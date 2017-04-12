@@ -4,6 +4,8 @@ params=get_params()
 url=None
 name=None
 mode=None
+show_code=None
+seasons=None
 
 try:
     url=urllib.unquote_plus(params["url"])
@@ -17,6 +19,14 @@ try:
     mode=int(params["mode"])
 except:
     pass
+try:
+    show_code=urllib.unquote_plus(params["show_code"])
+except:
+    pass
+try:
+    seasons=urllib.unquote_plus(params["seasons"])
+except:
+    pass
 
 
 if mode==None:                    
@@ -26,10 +36,10 @@ elif mode==200:
     listShows()
 
 elif mode==201:
-    listSeasons()
+    listSeasons(show_code,seasons)
 
 elif mode==202:
-    listEpisodes(show_id,season)
+    listEpisodes(show_code,season)
     
 elif mode==300:
     listMovies()
