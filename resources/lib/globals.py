@@ -73,12 +73,12 @@ def listLiveTV():
 
 def listShows():
     url = "http://fapi2.fxnetworks.com/ios/shows"
-    url += "?limit=500&fields=_id,availability_message,available_date,featured_reason,featured_weight,genre,hashtag,original,name,season,showcode,network,seasons,mega_og_description,meta_description,forum_page,social_facebook,social_getglue,social_twitter,tagline,tunein_text,sunrise,sunset,latest_playable_episode,latest_playable_clip,images,meta_keywords"    
-    #url += "?limit=500&fields=_id,genre,original,name,season,showcode,network,seasons,mega_og_description,meta_description,tagline,sunrise,sunset,images,meta_keywords"    
+    url += "?limit=500&fields=_id,availability_message,available_date,featured_reason,featured_weight,genre,hashtag,original,name,season,showcode,network,seasons,mega_og_description,meta_description,forum_page,social_facebook,social_getglue,social_twitter,tagline,tunein_text,sunrise,sunset,latest_playable_episode,latest_playable_clip,images,meta_keywords"        
     json_source = jsonRequest(url)
     for show in json_source['shows']:
         name = show['name']
-        xbmc.log(name)
+        meta_desc = show['meta_description']
+        genre = show['genre']
         icon = show['images']['poster_2x3']
         fanart = ''
         if 'thumbnail_16x9' in show['images']: fanart = show['images']['series_menu_4x3']
@@ -88,10 +88,10 @@ def listShows():
             if seasons != '': seasons += ','            
             seasons += str(season)
 
-        addDir(name,201,icon,fanart,None,show_code,seasons)
+        info = {'plot':meta_desc,'tvshowtitle':name,'title':name,'originaltitle':name,'genre':genre}
 
-
-
+        if seasons != '':
+            addDir(name,201,icon,fanart,info,show_code,seasons)
 
 
 def listSeasons(show_code,seasons,icon,fanart):          
@@ -103,7 +103,6 @@ def listSeasons(show_code,seasons,icon,fanart):
         listEpisodes(show_code,seasons)
 
     
-
 def listEpisodes(show_code,season):    
     url = "http://fapi2.fxnetworks.com/androidtv/videos"
     url += "?filter%5Bshowcode%5D="+show_code
