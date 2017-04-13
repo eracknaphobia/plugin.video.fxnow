@@ -6,6 +6,8 @@ name=None
 mode=None
 show_code=None
 seasons=None
+icon=None
+fanart=None
 
 try:
     url=urllib.unquote_plus(params["url"])
@@ -27,7 +29,14 @@ try:
     seasons=urllib.unquote_plus(params["seasons"])
 except:
     pass
-
+try:
+    icon=urllib.unquote_plus(params["icon"])
+except:
+    pass
+try:
+    fanart=urllib.unquote_plus(params["fanart"])
+except:
+    pass    
 
 if mode==None:                    
     mainMenu()
@@ -36,7 +45,7 @@ elif mode==200:
     listShows()
 
 elif mode==201:
-    listSeasons(show_code,seasons)
+    listSeasons(show_code,seasons,icon,fanart)
 
 elif mode==202:
     listEpisodes(show_code,season)

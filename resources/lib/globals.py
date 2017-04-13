@@ -88,54 +88,17 @@ def listShows():
             if seasons != '': seasons += ','            
             seasons += str(season)
 
-
-        xbmc.log("BEFORE        "+seasons)
-        #addDir(name,id,mode,iconimage,fanart=None,info=None,show_id=None)
         addDir(name,201,icon,fanart,None,show_code,seasons)
 
 
 
 
 
-def listSeasons(show_code,seasons):       
-    '''
-    GET http://fapi2.fxnetworks.com/ios/videos?limit=500&filter%5Bfapi_show_id%5D=89d81452-2b13-42d2-af60-f61b11228163&filter%5Bguid%5D=Archer_205_HD_Clean_AUTH%7CArcher_204_HD_Clean_AUTH%7CArcher_203_HD_Clean_AUTH%7CArcher_202_HD_Clean_AUTH%7CArcher_201_HD_Clean_AUTH HTTP/1.1
-    Host: fapi2.fxnetworks.com
-    X-NewRelic-ID: VQcHUlBaABAJUlFbDgMF
-    Connection: keep-alive
-    Authentication: ios:50f0f0b7e4d61136632030c671e340fadb1026cf
-    Accept: */*
-    User-Agent: FXNOW/1135 CFNetwork/808.3 Darwin/16.3.0
-    Accept-Language: en-us
-    Accept-Encoding: gzip, deflate
-    Connection: keep-alive
-
-    GET http://feed.theplatform.com/f/fng-fx/mvpdauthz_fxx?byGuid=Archer_201_HD_Clean_AUTH HTTP/1.1
-    Host: feed.theplatform.com
-    X-NewRelic-ID: VQcHUlBaABAJUlFbDgMF
-    Connection: keep-alive
-    Accept: */*
-    User-Agent: FXNOW/1135 CFNetwork/808.3 Darwin/16.3.0
-    Accept-Language: en-us
-    Accept-Encoding: gzip, deflate
-    Connection: keep-alive
-    '''
-
-    '''
-    for x in range(1, 29):
-        title = "Season "+str(x)
-        url = str(x)
-        #icon = 'http://thetvdb.com/banners/seasons/71663-'+str(x)+'-15.jpg'
-        #icon = 'http://thetvdb.com/banners/seasonswide/71663-'+str(x)+'.jpg'        
-        #icon = 'http://thetvdb.com/banners/seasons/71663-'+str(x)+'.jpg'
-        icon = art_root+season_art[str(x)]
-
-        addSeason(title,url,101,icon,FANART)
-    '''
+def listSeasons(show_code,seasons,icon,fanart):          
     #if only more than one seasons list else list episodes of season
     if ',' in seasons:
         for season in seasons.split(','):
-            addDir('Season '+str(season),201,None,None,None,show_code,season)
+            addDir('Season '+str(season),201,icon,fanart,None,show_code,season)
     else:
         listEpisodes(show_code,seasons)
 
@@ -238,15 +201,16 @@ def deauthorize():
     dialog.notification(LOCAL_STRING(30900), LOCAL_STRING(30901), '', 5000, False)  
         
 
-def addDir(name,mode,iconimage,fanart=None,info=None,show_code=None,seasons=None): 
+def addDir(name,mode,icon,fanart=None,info=None,show_code=None,seasons=None): 
     params = get_params()      
     ok=True    
-    u=sys.argv[0]+"?mode="+str(mode)
+    u=sys.argv[0]+"?mode="+str(mode)+'&icon='+urllib.quote_plus(icon)
     if show_code != None: u += '&show_code='+str(show_code)
     if seasons != None: u += '&seasons='+str(seasons)
+    if fanart != None: u += '&fanart='+urllib.quote_plus(fanart)
 
     liz=xbmcgui.ListItem(name)
-    liz.setArt({'icon': ICON, 'thumb': iconimage, 'fanart': fanart})    
+    liz.setArt({'icon': ICON, 'thumb': icon, 'fanart': fanart})    
     if info != None:
         liz.setInfo( type="Video", infoLabels=info)     
     ok=xbmcplugin.addDirectoryItem(handle=addon_handle,url=u,listitem=liz,isFolder=True)    
