@@ -111,7 +111,9 @@ def listEpisodes(show_code,season):
     
     #for episode in reversed(json_source['videos']):            
     for episode in sorted(json_source['videos'], key=lambda k: k['episode']):
-        title = episode['name']
+        show_title = episode['tags'][0]
+        title = episode['name']        
+        genre = episode['genre']
         #Default video type is 16x9
         link_url = episode['androidtv_video_url']
         icon = episode['img_url']
@@ -121,7 +123,7 @@ def listEpisodes(show_code,season):
         season = str(episode['season']).zfill(2) 
         episode = str(episode['episode']).zfill(2)         
 
-        info = {'plot':desc,'tvshowtitle':LOCAL_STRING(30000), 'season':season, 'episode':episode, 'title':title,'originaltitle':title,'duration':duration,'aired':aired,'genre':LOCAL_STRING(30002)}
+        info = {'plot':desc,'tvshowtitle':show_title, 'season':season, 'episode':episode, 'title':title,'originaltitle':title,'duration':duration,'aired':aired,'genre':genre}
         
         #addEpisode(title,url,title,icon,FANART,info)
         addStream(title,link_url,title,icon,None,info)
