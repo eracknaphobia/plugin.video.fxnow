@@ -42,7 +42,7 @@ if mode==None:
     mainMenu()
 
 elif mode==200:
-    listShows()
+    list_shows()
 
 elif mode==201:
     listSeasons(show_code,seasons,icon,fanart)

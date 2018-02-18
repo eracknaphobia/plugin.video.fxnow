@@ -5,32 +5,33 @@ import json
 import base64
 from adobepass.adobe import ADOBE
 
-
 addon_handle = int(sys.argv[1])
 ADDON = xbmcaddon.Addon()
 ROOTDIR = ADDON.getAddonInfo('path')
 FANART = os.path.join(ROOTDIR,"resources","fanart.jpg")
 ICON = os.path.join(ROOTDIR,"resources","icon.png")
 
-
-#Addon Settings 
+# Addon Settings
 RATIO = str(ADDON.getSetting(id="ratio"))
 COMMENTARY = str(ADDON.getSetting(id="commentary"))
 LOCAL_STRING = ADDON.getLocalizedString
 
 RESOURCE_ID = "<rss version='2.0'><channel><title>fx</title></channel></rss>"
-UA_FX = 'FXNOW/1135 CFNetwork/808.3 Darwin/16.3.0'
+UA_FX = 'FXNOW/3.5.1 (Linux;Android 6.0.1)'
 AUTH = 'androidtv:a4y4o0e01jh27dsyrrgpvo6d1wvpravc2c4szpp4'
+BASE_URL = 'https://api.fox.com'
 
-#Add-on specific Adobepass variables
-SERVICE_VARS = {'app_version': 'Fire TV',
-                'device_type':'firetv',             
-                'private_key':'B081JNlGKn1ZqpQH',
-                'public_key':'Dy1OhW3HrWk03QJrMMIULAmUdPQqk2Ds',
-                'registration_url':'fxnetworks.com/activate',
-                'requestor_id':'fx',
-                'resource_id':urllib.quote(RESOURCE_ID)
-               }
+# Add-on specific Adobepass variables
+SERVICE_VARS = {
+    'app_version': 'Fire TV',
+    'device_type':'firetv',
+    'private_key':'B081JNlGKn1ZqpQH',
+    'public_key':'Dy1OhW3HrWk03QJrMMIULAmUdPQqk2Ds',
+    'registration_url':'fxnetworks.com/activate',
+    'requestor_id':'fx',
+    'resource_id':urllib.quote(RESOURCE_ID)
+}
+
 
 def mainMenu():
     #addDir('Featured','/movies',100,ICON)
@@ -43,6 +44,7 @@ def listMovies():
     url = 'http://fapi2.fxnetworks.com/ios/videos'
     url += '?fields=guid,canonical,featuredReason,featuredWeight,fullEpisode,genre,houseNumber,movie,network,name,original,premiere,promoteMovie,season,source,stage,type,uID,dialogue,slug,longDescription,episode,showcode,_id,aptve_video_url,fapi_show_id,ingest_id,ios_video_url,is_live,mobile_video_url,movie_clip,mpxId,requiresAuth,freewheelId,sami_url,scc_url,show_id,srt_url,video_url,year_released,delivery_format,description,img_url,airDate,authEndDate,availableDate,bankableAvailableDate,bankableExpirationDate,expirationDate,displayAvailableDate,displayExpirationDate,endDate,duration,series_title,video_urls,win8VideoRow,images,ratings,categories,tags,actors,guestStars,actors,majorCharacters,video_url_commentary,factoids,videos,freewheelId_commentary,trailerGUID&order=airDate:desc&filter%5Btype%5D=movie%7Cmovie-trailer&limit=500'
     #url += '?fields=movie&limit=500'
+    url = BASE_URL + '/fbc-content/v1_5/series?seriesType=movie&itemsPerPage=700'
     json_source = jsonRequest(url)
 
     for show in json_source['videos']:
@@ -54,7 +56,6 @@ def listMovies():
             url = show['ios_video_url']
             #addStream(name,link_url,title,iconimage,fanart,info=None)
             addStream(name,url,name,icon,fanart)
-
 
 
 def listLiveTV(): 
@@ -70,33 +71,57 @@ def listLiveTV():
             addStream(name,url,201,icon,fanart)
 
 
-
-def listShows():
-    url = "http://fapi2.fxnetworks.com/ios/shows"
-    url += "?limit=500&fields=_id,availability_message,available_date,featured_reason,featured_weight,genre,hashtag,original,name,season,showcode,network,seasons,mega_og_description,meta_description,forum_page,social_facebook,social_getglue,social_twitter,tagline,tunein_text,sunrise,sunset,latest_playable_episode,latest_playable_clip,images,meta_keywords"        
+def list_shows():
+    """
+    GET https://api.fox.com/fbc-content/v1_5/screenpanels/58de915ceffde70001a6e761/items HTTP/1.1
+    ApiKey: c7d8fa9220f040358f64e472e850458e
+    ad165b659b9e4ddeb3c992238e1f9848
+    Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJZVzVrY205cFpHTTFOemRtTVdZeU9HSTRaREU0TVdRPSIsImFjY291bnRUeXBlIjoiYW5vbnltb3VzIiwidXNlclR5cGUiOiJkZXZpY2VJZCIsImRldmljZUlkIjoiYzU3N2YxZjI4YjhkMTgxZCIsImRldmljZSI6ImFuZHJvaWQiLCJ2ZXJzaW9uIjowLCJpYXQiOjE1MTg5MDQ3MjIsImV4cCI6MTUyNjY4MDcyMn0.bZPAGB5tSbPLjfaV9W4yeZvFMwJnIs7Cgez5RBnY1r4
+    Host: api.fox.com
+    Connection: Keep-Alive
+    Accept-Encoding: gzip
+    User-Agent: FXNOW/3.5.1 (Linux;Android 6.0.1)
+    """
+    #url = "http://fapi2.fxnetworks.com/ios/shows"
+    #url += "?limit=500&fields=_id,availability_message,available_date,featured_reason,featured_weight,genre,hashtag,original,name,season,showcode,network,seasons,mega_og_description,meta_description,forum_page,social_facebook,social_getglue,social_twitter,tagline,tunein_text,sunrise,sunset,latest_playable_episode,latest_playable_clip,images,meta_keywords"
+    url = BASE_URL + '/fbc-content/v1_5/series?seriesType=series&itemsPerPage=700'
     json_source = jsonRequest(url)
-    for show in json_source['shows']:
+    for show in json_source['member']:
         name = show['name']
-        meta_desc = show['meta_description']
-        genre = show['genre']
-        icon = show['images']['poster_2x3']
-        fanart = ''
-        if 'thumbnail_16x9' in show['images']: fanart = show['images']['series_menu_4x3']
-        show_code = show['showcode']
+        plot = ''
+        if 'description' in show:
+            plot = show['description']
+        genre = ''
+        for item in show['genres']:
+            if genre != '': ', '
+            genre += item
+        icon = show['images']['seriesList']['FHD']
+        fanart = show['images']['videoDetail']['FHD']
+
+        show_code = ''
+        if 'fyiSeriesId' in show:
+            show_code = show['fyiSeriesId']
         seasons = ''
+        """
         for season in show['seasons']:            
             if seasons != '': seasons += ','            
             seasons += str(season)
+        """
+        info = {
+            'plot': plot,
+            'tvshowtitle': name,
+            'title': name,
+            'originaltitle': name,
+            'genre': genre
+        }
 
-        info = {'plot':meta_desc,'tvshowtitle':name,'title':name,'originaltitle':name,'genre':genre}
-
-        if seasons != '':
-            addDir(name,201,icon,fanart,info,show_code,seasons)
+        #if seasons != '':
+        addDir(name,201,icon,fanart,info,show_code,seasons)
 
 
 def listSeasons(show_code,seasons,icon,fanart):          
     #if only more than one seasons list else list episodes of season
-    if ',' in seasons:
+    if seasons is not None and ',' in seasons:
         for season in seasons.split(','):
             addDir('Season '+str(season),201,icon,fanart,None,show_code,season)
     else:
@@ -127,7 +152,6 @@ def listEpisodes(show_code,season):
         
         #addEpisode(title,url,title,icon,FANART,info)
         addStream(title,link_url,title,icon,None,info)
-
 
 
 def getStream(url):
@@ -176,7 +200,8 @@ def jsonRequest(url):
     req.add_header("Accept-Encoding", "deflate")
     req.add_header("Accept-Language", "en-us")
     req.add_header("Connection", "keep-alive")
-    req.add_header("Authentication", AUTH)
+    #req.add_header("Authentication", AUTH)
+    req.add_header("ApiKey", "c7d8fa9220f040358f64e472e850458e")
     req.add_header("User-Agent", UA_FX)
     response = urllib2.urlopen(req)   
     json_source = json.load(response)                       
@@ -206,13 +231,13 @@ def addDir(name,mode,icon,fanart=None,info=None,show_code=None,seasons=None):
     params = get_params()      
     ok=True    
     u=sys.argv[0]+"?mode="+str(mode)+'&icon='+urllib.quote_plus(icon)
-    if show_code != None: u += '&show_code='+str(show_code)
-    if seasons != None: u += '&seasons='+str(seasons)
-    if fanart != None: u += '&fanart='+urllib.quote_plus(fanart)
+    if show_code is not None: u += '&show_code=' + str(show_code)
+    if seasons is not None: u += '&seasons=' + str(seasons)
+    if fanart is not None: u += '&fanart=' + urllib.quote_plus(fanart)
 
     liz=xbmcgui.ListItem(name)
     liz.setArt({'icon': ICON, 'thumb': icon, 'fanart': fanart})    
-    if info != None:
+    if info is not None:
         liz.setInfo( type="Video", infoLabels=info)     
     ok=xbmcplugin.addDirectoryItem(handle=addon_handle,url=u,listitem=liz,isFolder=True)    
     xbmcplugin.setContent(addon_handle, 'tvshows')
@@ -226,7 +251,7 @@ def addStream(name,link_url,title,iconimage,fanart,info=None):
     liz.setArt({'icon': ICON, 'thumb': iconimage, 'fanart': fanart})    
     liz.setProperty("IsPlayable", "true")
     liz.setInfo( type="Video", infoLabels={ "Title": title, 'mediatype': 'episode' } )
-    if info != None:
+    if info is not None:
         liz.setInfo( type="Video", infoLabels=info) 
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False)
     xbmcplugin.setContent(addon_handle, 'tvshows')    
@@ -240,7 +265,7 @@ def addSeason(name,url,mode,iconimage,fanart=None,info=None):
     liz=xbmcgui.ListItem(name)
     liz.setArt({'icon': ICON, 'thumb': iconimage, 'fanart': fanart})
     liz.setInfo( type="Video", infoLabels={ 'Title': name, 'tvdb_id': '71663', 'mediatype': 'season' } )
-    if info != None:
+    if info is not None:
         liz.setInfo( type="Video", infoLabels=info)     
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)    
     xbmcplugin.setContent(addon_handle, 'tvshows')
